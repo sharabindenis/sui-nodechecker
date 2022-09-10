@@ -6,7 +6,6 @@ type Schedule struct {
 }
 
 func (b *Schedule) CreateSchedule() *Schedule {
-
 	return b
 }
 

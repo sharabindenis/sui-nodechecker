@@ -13,36 +13,84 @@ import (
 
 // TODO basicauth
 
-var Schedule *models.Schedule
-var s = gocron.NewScheduler()
-
-type TotalTransaction struct {
+type SuiTotalTransaction struct {
 	Jsonrpc string `json:"jsonrpc"`
 	Result  int    `json:"result"`
 	ID      int    `json:"id"`
 }
 
-//func Index(w http.ResponseWriter, r *http.Request) {
-//	p := path.Dir("/index.html")
-//	fmt.Println(p)
-//	// set header
-//	w.Header().Set("Content-type", "text/html")
-//	http.ServeFile(w, r, p)
-//}
+type SuiTask struct {
+	//gorm.Model
+	Ip  string      `json:"ip"`
+	Job *gocron.Job `json:"job"`
+}
+
+var SuiTaskHolder = map[string]SuiTask{}
+var s = gocron.NewScheduler()
+
+func (b *SuiTask) CreateSuiTask() *SuiTask {
+
+	return b
+}
 
 func CreateSchedule(w http.ResponseWriter, r *http.Request) {
 	sch := &models.Schedule{}
 	utils.ParseBody(r, sch)
 	fmt.Println("Node Ip", sch.Ip)
 	fmt.Println("Period, seconds", sch.Period)
-	s.Every(sch.Period).Seconds().Do(TotalTT, sch.Ip)
-	<-s.Start()
+	//fmt.Println()
+	//holder := SuiTaskHolder
+	task, ok := SuiTaskHolder[sch.Ip]
+	fmt.Println(task.Job)
+	if ok {
+		fmt.Println(task)
+	} else {
+		//err := s.Every(sch.Period).Seconds().Do(TotalTT, sch.Ip)
+		job := s.Every(sch.Period).Seconds()
+		err := job.Do(TotalTT, sch.Ip)
+		//job.Tag("EtoNoviiJob")
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("1")
+		go s.Start()
+		var dopizdi = SuiTask{sch.Ip, job}
+		SuiTaskHolder[sch.Ip] = dopizdi
+		fmt.Println(dopizdi)
+	}
+	//fmt.Println(SuiTaskHolder)
+	w.WriteHeader(http.StatusOK)
+}
+
+func ShowTasks(w http.ResponseWriter, r *http.Request) {
+	items := make([]SuiTask, len(SuiTaskHolder))
+	var i int
+	for _, v := range SuiTaskHolder {
+		items[i] = v
+		i++
+	}
+	fmt.Println(items)
+	res, err := json.Marshal(items)
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+	//return items
+}
+
+func StopSchedule(w http.ResponseWriter, r *http.Request) {
+	stp := &SuiTask{}
+	utils.ParseBody(r, stp)
+	task := SuiTaskHolder[stp.Ip]
+	s.RemoveByRef(task.Job)
+	delete(SuiTaskHolder, stp.Ip)
 	w.WriteHeader(http.StatusOK)
 }
 
 func TotalTT(ip string) {
 	//fmt.Println("start")
-	fullnodett := &TotalTransaction{}
+	fullnodett := &SuiTotalTransaction{}
 	//формирование запроса
 	var url string
 	url = ip
@@ -70,28 +118,29 @@ func TotalTT(ip string) {
 	//body, err := ioutil.ReadAll(res.Body) // response body is []byte
 	err = json.NewDecoder(res.Body).Decode(fullnodett)
 
+	fmt.Println(fullnodett.Result)
 	//check spread of transactions
 	// TODO mssg model
-	if err == nil {
-		url := fmt.Sprint("https://api.telegram.org/bot5436979593:AAEEoh_5A6-OeUEdXEdnTBeRcMbdCMk1hXk/sendMessage?chat_id=-725815999&text=Total%20%20", fullnodett.Result, " ", ip) //paste your credentials
-		method := "GET"
-
-		client := &http.Client{}
-		req, err := http.NewRequest(method, url, nil)
-
-		if err != nil {
-			fmt.Println(err)
-		}
-		res, err := client.Do(req)
-		if err != nil {
-			fmt.Println(err)
-		}
-		defer res.Body.Close()
-	}
+	//if err == nil {
+	//	url := fmt.Sprint("https://api.telegram.org/bot5436979593:AAEEoh_5A6-OeUEdXEdnTBeRcMbdCMk1hXk/sendMessage?chat_id=-725815999&text=Total%20%20", fullnodett.Result, " ", ip) //paste your credentials
+	//	method := "GET"
+	//
+	//	client := &http.Client{}
+	//	req, err := http.NewRequest(method, url, nil)
+	//
+	//	if err != nil {
+	//		fmt.Println(err)
+	//	}
+	//	res, err := client.Do(req)
+	//	if err != nil {
+	//		fmt.Println(err)
+	//	}
+	//	defer res.Body.Close()
+	//}
 }
 
 //func CheckSpreadTransaction(ipstr string) {
-//	fullnodett := &TotalTransaction{} //создается
+//	fullnodett := &SuiTotalTransaction{} //создается
 //	//формирование запроса
 //	url := "https://fullnode.devnet.sui.io/"
 //	method := "POST"
@@ -120,7 +169,7 @@ func TotalTT(ip string) {
 //	}
 //	fmt.Println(fullnodett.Result)
 //
-//	mynodett := &TotalTransaction{} //создается
+//	mynodett := &SuiTotalTransaction{} //создается
 //	//формирование запроса
 //	myurl := ipstr
 //	myclient := &http.Client{}
@@ -164,15 +213,3 @@ func TotalTT(ip string) {
 //		defer res.Body.Close()
 //	}
 //}
-
-func Stop(w http.ResponseWriter, r *http.Request) {
-	//s.Remove(CheckSpreadTransaction)
-	jobs := s.Jobs()
-	s.Remove(TotalTT)
-	fmt.Println("Schedule stop", jobs)
-}
-
-func ShowJobs(w http.ResponseWriter, r *http.Request) {
-	jobs := s.Jobs()
-	fmt.Println("Now works ", jobs)
-}
