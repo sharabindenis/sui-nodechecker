@@ -1,9 +1,5 @@
 # Simple fullnode checker
 
-### Baisic auth<br/>
-authn - user<br/>
-authz - role<br/>
-
 ### Telegram bot
 apiendpoint const
 ```
