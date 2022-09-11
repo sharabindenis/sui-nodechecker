@@ -2,13 +2,12 @@ package routes
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/sharabindenis/sui-nodechecker/pkg/controllers"
 )
 
 var RegisterNodeRoutes = func(router *mux.Router) {
-	router.HandleFunc("/start/", controllers.CreateSchedule).Methods("POST")
-	router.HandleFunc("/stop/", controllers.StopSchedule).Methods("POST")
-	router.HandleFunc("/tasks/", controllers.ShowTasks).Methods("GET")
+	//router.HandleFunc("/start/", controllers.CreateSchedule).Methods("POST")
+	//router.HandleFunc("/stop/", controllers.StopSchedule).Methods("POST")
+	//router.HandleFunc("/tasks/", controllers.ShowTasks).Methods("GET")
 	//router.PathPrefix("/").Handler(http.FileServer(http.Dir("./pkg/views/")))
 	//router.HandleFunc("/", controllers.Index)
 	//router.HandleFunc("/node/", controllers.GetNodes).Methods("GET")

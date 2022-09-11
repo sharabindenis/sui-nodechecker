@@ -16,21 +16,13 @@ Content-Type: application/json
   "period": 2
 }
 
-###  Schedule start 3
-POST http://localhost:9010/start/
-Content-Type: application/json
-
-{
-  "ip": "http://5.23.48.96:9000",
-  "period": 2
-}
 
 ### Schedule stop
 POST http://localhost:9010/stop/
 Content-Type: application/json
 
 {
-   "ip": "http://45.8.147.68:9000"
+   "ip": "http://5.23.48.96:9000"
 }
 
 ### Show Schedules

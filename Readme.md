@@ -1,22 +1,41 @@
 # Simple fullnode checker
 
-### Comands<br/>
+### Baisic auth<br/>
+authn - user<br/>
+authz - role<br/>
+
+### Telegram bot
+apiendpoint const
+```
+{
+    chatid string
+    key	string
+    message string
+}
+```
+### Web commands<br/>
 POST `/start/`<br/>
 ```
 { 
-  Ip
-  Seconds
+  Ip string
+  Seconds int
 }
 ```
-GET `/stop/`<br/>
-GET `/jobs/`<br/>
+POST `/stop/`<br/>
+```
+{
+  Ip string
+}
+```
+GET `/tasks/`<br/>
 
 ### Packages<br/>
 go get github.com/antchfx/htmlquery - XPath query package for the HTML document<br/>
 // go get github.com/jinzhu/gorm - db connector<br/>
 // go get github.com/jinzhu/gorm/dialects/mysql - dialect<br/>
 go get github.com/gorilla/mux - router<br/>
-go get github.com/go-co-op/gocron - планировщик задач<br/>
+go get github.com/go-co-op/gocron - crone RemoveByRef<br/>
+github.com/Syfaro/telegram-bot-api - tg connector
 
 ### MySQL<br/>
 ```

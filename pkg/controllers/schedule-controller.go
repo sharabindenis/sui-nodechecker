@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/jasonlvhit/gocron"
 	"github.com/sharabindenis/sui-nodechecker/pkg/models"
-	"github.com/sharabindenis/sui-nodechecker/pkg/utils"
+	"io"
 	"net/http"
 	_ "path/filepath"
 	"strings"
@@ -18,7 +18,6 @@ type SuiTotalTransaction struct {
 	Result  int    `json:"result"`
 	ID      int    `json:"id"`
 }
-
 type SuiTask struct {
 	//gorm.Model
 	Ip  string      `json:"ip"`
@@ -26,72 +25,37 @@ type SuiTask struct {
 }
 
 var SuiTaskHolder = map[string]SuiTask{}
-var s = gocron.NewScheduler()
+var S = gocron.NewScheduler()
+var Sch = &models.Schedule{}
 
 func (b *SuiTask) CreateSuiTask() *SuiTask {
 
 	return b
 }
 
-func CreateSchedule(w http.ResponseWriter, r *http.Request) {
-	sch := &models.Schedule{}
-	utils.ParseBody(r, sch)
-	fmt.Println("Node Ip", sch.Ip)
-	fmt.Println("Period, seconds", sch.Period)
+func CreateScheduleByBot(ip string, chtid int64) {
+	fmt.Println("Node Ip", ip)
+	//fmt.Println("Period, seconds", Sch.Period)
 	//fmt.Println()
 	//holder := SuiTaskHolder
-	task, ok := SuiTaskHolder[sch.Ip]
-	fmt.Println(task.Job)
-	if ok {
-		fmt.Println(task)
-	} else {
-		//err := s.Every(sch.Period).Seconds().Do(TotalTT, sch.Ip)
-		job := s.Every(sch.Period).Seconds()
-		err := job.Do(TotalTT, sch.Ip)
-		//job.Tag("EtoNoviiJob")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println("1")
-		go s.Start()
-		var dopizdi = SuiTask{sch.Ip, job}
-		SuiTaskHolder[sch.Ip] = dopizdi
-		fmt.Println(dopizdi)
-	}
-	//fmt.Println(SuiTaskHolder)
-	w.WriteHeader(http.StatusOK)
-}
 
-func ShowTasks(w http.ResponseWriter, r *http.Request) {
-	items := make([]SuiTask, len(SuiTaskHolder))
-	var i int
-	for _, v := range SuiTaskHolder {
-		items[i] = v
-		i++
-	}
-	fmt.Println(items)
-	res, err := json.Marshal(items)
+	//err := S.Every(Sch.Period).Seconds().Do(TotalTT, Sch.Ip)
+	job := S.Every(30).Seconds()
+	err := job.Do(TotalTT, ip, chtid)
 	if err != nil {
 		fmt.Println(err)
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-	//return items
+	fmt.Println("1")
+	go S.Start()
+	fmt.Println(S.Jobs())
+	var forhold = SuiTask{ip, job}
+	SuiTaskHolder[Sch.Ip] = forhold
+	fmt.Println(forhold)
+
 }
 
-func StopSchedule(w http.ResponseWriter, r *http.Request) {
-	stp := &SuiTask{}
-	utils.ParseBody(r, stp)
-	task := SuiTaskHolder[stp.Ip]
-	s.RemoveByRef(task.Job)
-	delete(SuiTaskHolder, stp.Ip)
-	w.WriteHeader(http.StatusOK)
-}
-
-func TotalTT(ip string) {
-	//fmt.Println("start")
+func TotalTT(ip string, chtid int64) {
 	fullnodett := &SuiTotalTransaction{}
-	//формирование запроса
 	var url string
 	url = ip
 	method := "POST"
@@ -111,7 +75,12 @@ func TotalTT(ip string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(res.Body)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -119,24 +88,7 @@ func TotalTT(ip string) {
 	err = json.NewDecoder(res.Body).Decode(fullnodett)
 
 	fmt.Println(fullnodett.Result)
-	//check spread of transactions
-	// TODO mssg model
-	//if err == nil {
-	//	url := fmt.Sprint("https://api.telegram.org/bot5436979593:AAEEoh_5A6-OeUEdXEdnTBeRcMbdCMk1hXk/sendMessage?chat_id=-725815999&text=Total%20%20", fullnodett.Result, " ", ip) //paste your credentials
-	//	method := "GET"
-	//
-	//	client := &http.Client{}
-	//	req, err := http.NewRequest(method, url, nil)
-	//
-	//	if err != nil {
-	//		fmt.Println(err)
-	//	}
-	//	res, err := client.Do(req)
-	//	if err != nil {
-	//		fmt.Println(err)
-	//	}
-	//	defer res.Body.Close()
-	//}
+	TelegramBotAlert(chtid, fullnodett.Result)
 }
 
 //func CheckSpreadTransaction(ipstr string) {
@@ -212,4 +164,60 @@ func TotalTT(ip string) {
 //		}
 //		defer res.Body.Close()
 //	}
+//}
+
+//OLD REST
+
+//func CreateSchedule(w http.ResponseWriter, r *http.Request) {
+//	utils.ParseBody(r, Sch)
+//	fmt.Println("Node Ip", Sch.Ip)
+//	fmt.Println("Period, seconds", Sch.Period)
+//	//fmt.Println()
+//	//holder := SuiTaskHolder
+//	task, ok := SuiTaskHolder[Sch.Ip]
+//	fmt.Println(task.Job)
+//	if ok {
+//		fmt.Println(task)
+//	} else {
+//		//err := S.Every(Sch.Period).Seconds().Do(TotalTT, Sch.Ip)
+//		job := S.Every(Sch.Period).Seconds()
+//		err := job.Do(TotalTT, Sch.Ip)
+//		//job.Tag("EtoNoviiJob")
+//		if err != nil {
+//			fmt.Println(err)
+//		}
+//		fmt.Println("1")
+//		go S.Start()
+//		var dopizdi = SuiTask{Sch.Ip, job}
+//		SuiTaskHolder[Sch.Ip] = dopizdi
+//		fmt.Println(dopizdi)
+//	}
+//	//fmt.Println(SuiTaskHolder)
+//	w.WriteHeader(http.StatusOK)
+//}
+
+//func ShowTasks(w http.ResponseWriter, r *http.Request) {
+//	items := make([]SuiTask, len(SuiTaskHolder))
+//	var i int
+//	for _, v := range SuiTaskHolder {
+//		items[i] = v
+//		i++
+//	}
+//	fmt.Println(items)
+//	res, err := json.Marshal(items)
+//	if err != nil {
+//		fmt.Println(err)
+//	}
+//	w.WriteHeader(http.StatusOK)
+//	w.Write(res)
+//	//return items
+//}
+//
+//func StopSchedule(w http.ResponseWriter, r *http.Request) {
+//	stp := &SuiTask{}
+//	utils.ParseBody(r, stp)
+//	task := SuiTaskHolder[stp.Ip]
+//	S.RemoveByRef(task.Job)
+//	delete(SuiTaskHolder, stp.Ip)
+//	w.WriteHeader(http.StatusOK)
 //}
