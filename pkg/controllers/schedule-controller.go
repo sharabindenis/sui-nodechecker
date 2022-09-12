@@ -40,7 +40,7 @@ func CreateScheduleByBot(ip string, chtid int64) {
 	//holder := SuiTaskHolder
 
 	//err := S.Every(Sch.Period).Seconds().Do(TotalTT, Sch.Ip)
-	job := S.Every(30).Seconds()
+	job := S.Every(3).Seconds()
 	err := job.Do(TotalTT, ip, chtid)
 	if err != nil {
 		fmt.Println(err)
@@ -75,6 +75,7 @@ func TotalTT(ip string, chtid int64) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -88,7 +89,7 @@ func TotalTT(ip string, chtid int64) {
 	err = json.NewDecoder(res.Body).Decode(fullnodett)
 
 	fmt.Println(fullnodett.Result)
-	TelegramBotAlert(chtid, fullnodett.Result)
+	TelegramBotAlert(chtid, fullnodett.Result, ip)
 }
 
 //func CheckSpreadTransaction(ipstr string) {

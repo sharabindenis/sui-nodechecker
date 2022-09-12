@@ -1,4 +1,4 @@
-# Simple fullnode checker
+# Simple sui fullnode checker
 
 ### Telegram bot
 apiendpoint const
