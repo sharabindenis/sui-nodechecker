@@ -56,8 +56,23 @@ func TelegramBot() {
 			}
 		case "start":
 			msg.Text = "Hi :) Send me fullnode ip like /ip 1.1.1.1 and I will start checker every 30 seconds"
-		case "status":
-			msg.Text = "I'm ok."
+		case "check":
+			beforeplace := update.Message.Text
+			afterreplace := strings.ReplaceAll(beforeplace, "/check ", "")
+			regexp := regexp2.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`)
+			fmt.Println(regexp.MatchString(afterreplace))
+			if regexp.MatchString(afterreplace) {
+				ip := "http://" + afterreplace + ":9000"
+				ok := CheckIp(ip)
+				fmt.Println(ok)
+				if ok != nil {
+					msg.Text = ok.Error()
+				} else {
+					msg.Text = "`" + afterreplace + "`" + " Ok!"
+				}
+			} else {
+				msg.Text = "Not valid ip, send me fullnode address like 1.1.1.1"
+			}
 		default:
 			msg.Text = "I don't know that command"
 		}

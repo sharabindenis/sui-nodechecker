@@ -6,6 +6,7 @@ import (
 	"github.com/jasonlvhit/gocron"
 	"github.com/sharabindenis/sui-nodechecker/pkg/models"
 	"io"
+	"io/ioutil"
 	"net/http"
 	_ "path/filepath"
 	"strings"
@@ -51,6 +52,42 @@ func CreateScheduleByBot(ip string, chtid int64) {
 	var forhold = SuiTask{ip, job}
 	SuiTaskHolder[Sch.Ip] = forhold
 	fmt.Println(forhold)
+
+}
+
+func CheckIp(ip string) error {
+
+	url := ip
+	method := "POST"
+
+	payload := strings.NewReader(``)
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Sprint(string(body))
+	return err
+}
+
+func StopScheduleByBot(ip string, chtid int64) {
 
 }
 
