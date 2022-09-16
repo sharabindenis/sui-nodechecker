@@ -54,6 +54,7 @@ func TelegramBot() {
 			} else {
 				msg.Text = "Not valid ip, send me fullnode address like 1.1.1.1"
 			}
+
 		case "start":
 			msg.Text = "Hi :) Send me fullnode ip like /ip 1.1.1.1 and I will start checker every 30 seconds"
 		case "check":
@@ -73,6 +74,27 @@ func TelegramBot() {
 			} else {
 				msg.Text = "Not valid ip, send me fullnode address like 1.1.1.1"
 			}
+		case "show":
+			items := make([]SuiTask, len(SuiTaskHolder))
+			var i int
+			for _, v := range SuiTaskHolder {
+				msg.Text = v.Ip
+				items[i] = v
+				i++
+			}
+			fmt.Println(items)
+			//res, err := json.Marshal(items)
+			//if err != nil {
+			//	fmt.Println(err)
+			//}
+			//return items
+			//msg.Text =
+		case "stop":
+			StopAllScheduleByBot()
+			if err != nil {
+				log.Println(err)
+			}
+			msg.Text = "Stop all schedules"
 		default:
 			msg.Text = "I don't know that command"
 		}

@@ -10,6 +10,7 @@ apiendpoint const
 }
 ```
 ### Web commands<br/>
+//deprecated<br/>
 POST `/start/`<br/>
 ```
 { 
@@ -44,4 +45,10 @@ CREATE DATABASE;
 docker
 docker build -t sch/dev:latest .
 docker run -p 8080:8080 -d sch/dev:latest
+```
+### Test data</br
+```
+/ip 5.23.48.96
+/ip 45.8.147.68
+/ip 159.223.119.225
 ```

@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-// TODO basicauth
-
 type SuiTotalTransaction struct {
 	Jsonrpc string `json:"jsonrpc"`
 	Result  int    `json:"result"`
@@ -41,7 +39,7 @@ func CreateScheduleByBot(ip string, chtid int64) {
 	//holder := SuiTaskHolder
 
 	//err := S.Every(Sch.Period).Seconds().Do(TotalTT, Sch.Ip)
-	job := S.Every(3).Seconds()
+	job := S.Every(30).Seconds()
 	err := job.Do(TotalTT, ip, chtid)
 	if err != nil {
 		fmt.Println(err)
@@ -50,8 +48,9 @@ func CreateScheduleByBot(ip string, chtid int64) {
 	go S.Start()
 	fmt.Println(S.Jobs())
 	var forhold = SuiTask{ip, job}
-	SuiTaskHolder[Sch.Ip] = forhold
+	SuiTaskHolder[ip] = forhold
 	fmt.Println(forhold)
+	fmt.Println(SuiTaskHolder)
 
 }
 
@@ -87,8 +86,22 @@ func CheckIp(ip string) error {
 	return err
 }
 
-func StopScheduleByBot(ip string, chtid int64) {
-
+func StopAllScheduleByBot() {
+	//ts := &SuiTask{}
+	//task := SuiTask{Ip: SuiTaskHolder, Job: SuiTaskHolder}
+	items := make([]SuiTask, len(SuiTaskHolder))
+	var i int
+	for _, v := range SuiTaskHolder {
+		S.RemoveByRef(v.Job)
+		delete(SuiTaskHolder, v.Ip)
+		fmt.Println(v)
+		items[i] = v
+		i++
+	}
+	//task := SuiTaskHolder[ts.Ip]
+	//S.RemoveByRef(task.Job)
+	//delete(SuiTaskHolder, task.Ip)
+	//log.Println(task)
 }
 
 func TotalTT(ip string, chtid int64) {
