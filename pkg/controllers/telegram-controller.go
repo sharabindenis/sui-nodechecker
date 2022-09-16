@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const TOKEN = "5436979593:AAEEoh_5A6-OeUEdXEdnTBeRcMbdCMk1hXk"
+const TOKEN = "#####"
 
 func TelegramBot() {
 	bot, err := tgbotapi.NewBotAPI(TOKEN)
