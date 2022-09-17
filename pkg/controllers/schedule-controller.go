@@ -33,13 +33,14 @@ func (b *SuiTask) CreateSuiTask() *SuiTask {
 }
 
 func CreateScheduleByBot(ip string, chtid int64) {
-	fmt.Println("Node Ip", ip)
+	fmt.Println("Node Ip is ", ip)
+	//fmt.Println("Timer is ", ti)
 	//fmt.Println("Period, seconds", Sch.Period)
 	//fmt.Println()
 	//holder := SuiTaskHolder
 
 	//err := S.Every(Sch.Period).Seconds().Do(TotalTT, Sch.Ip)
-	job := S.Every(30).Seconds()
+	job := S.Every(3600).Seconds()
 	err := job.Do(TotalTT, ip, chtid)
 	if err != nil {
 		fmt.Println(err)
@@ -98,6 +99,7 @@ func StopAllScheduleByBot() {
 		items[i] = v
 		i++
 	}
+	fmt.Println(SuiTaskHolder)
 	//task := SuiTaskHolder[ts.Ip]
 	//S.RemoveByRef(task.Job)
 	//delete(SuiTaskHolder, task.Ip)

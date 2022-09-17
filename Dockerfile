@@ -1,6 +1,4 @@
-CMD ["/docker-gs-ping"]
-
-FROM golang:1.16-alpine
+FROM golang:1.18-alpine
 
 WORKDIR /app
 
@@ -9,6 +7,8 @@ COPY go.sum ./
 RUN go mod download
 
 COPY ./cmd/main/*.go /app
+COPY ./pkg/controllers/*.go /app/pkg/controllers/
+COPY ./pkg/models/*.go /app/pkg/models/
 
 RUN go build -o /docker-gs-ping
 
