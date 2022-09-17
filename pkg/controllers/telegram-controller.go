@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const TOKEN = "#####"
+const TOKEN = "#######"
 
 func TelegramBot() {
 	bot, err := tgbotapi.NewBotAPI(TOKEN)
@@ -19,11 +19,9 @@ func TelegramBot() {
 	//fmt.Println(bot)
 	bot.Debug = false
 	log.Printf("Authorized on account %s", bot.Self.UserName)
-
 	//Устанавливаем время обновления
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-
 	//Получаем обновления от бота
 	updates, err := bot.GetUpdatesChan(u)
 
